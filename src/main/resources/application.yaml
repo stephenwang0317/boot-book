@@ -1,0 +1,29 @@
+server:
+  port: 28888
+
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://123.56.143.129/boot-book?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8
+    username: remote
+    password: 123456
+  data:
+    redis:
+      host: 123.56.143.129
+      port: 6379
+      password: wjm
+      database: 0
+      timeout: 1800000
+      lettuce:
+        pool:
+          max-active: 20
+          max-wait: -1
+          max-idle: 5
+          min-idle: 0
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  type-aliases-package: com.wjm.bootbook.entity.pojo

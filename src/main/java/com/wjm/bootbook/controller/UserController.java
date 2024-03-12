@@ -1,5 +1,6 @@
 package com.wjm.bootbook.controller;
 
+import com.wjm.bootbook.entity.common.ExceptionMessage;
 import com.wjm.bootbook.entity.common.ResponseResult;
 import com.wjm.bootbook.entity.dto.JwtDTO;
 import com.wjm.bootbook.entity.dto.LoginDTO;
@@ -9,6 +10,8 @@ import com.wjm.bootbook.entity.pojo.User;
 import com.wjm.bootbook.entity.vo.LoginVO;
 import com.wjm.bootbook.entity.vo.RegisterVO;
 import com.wjm.bootbook.entity.vo.UserUpdateVO;
+import com.wjm.bootbook.exception.CustomException;
+import com.wjm.bootbook.exception.RegisterException;
 import com.wjm.bootbook.service.UserService;
 import com.wjm.bootbook.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,16 +44,14 @@ public class UserController {
             StringBuilder sb = new StringBuilder();
             errors.forEach(objectError -> sb.append(objectError.getDefaultMessage()).append("; "));
             String failReason = sb.toString();
-            RegisterVO vo = new RegisterVO(false, null);
-            return ResponseResult.fail(vo, failReason);
+            throw new RegisterException("register failed, because: " + failReason);
         }
 
         String username = dto.getUsername();
         String password = dto.getPassword();
         User user = userService.saveUser(username, password);
         if (user == null) {
-            RegisterVO vo = new RegisterVO(false, null);
-            return ResponseResult.fail(vo, "register fail");
+            throw new RegisterException("register failed");
         } else {
             RegisterVO vo = new RegisterVO(true, user.getUserId());
             return ResponseResult.success(vo);
@@ -69,15 +70,14 @@ public class UserController {
                 sb.append(objectError.getDefaultMessage()).append("; ");
             });
             String failReason = sb.toString();
-            LoginVO vo = new LoginVO();
-            return ResponseResult.fail(vo, failReason);
+            throw new CustomException(failReason);
         }
 
         Long userId = dto.getUserId();
         String password = dto.getPassword();
         User user = userService.userLogin(userId, password);
         if (user == null) {
-            return ResponseResult.fail(new LoginVO(), "id or password error");
+            throw new CustomException(ExceptionMessage.LOGIN_ERROR.getMessage());
         } else {
             String s = JwtUtils.creatJwt(user);
             return ResponseResult.success(new LoginVO(s));
@@ -89,25 +89,25 @@ public class UserController {
         return dto;
     }
 
-    @PostMapping("/info/{userId}")
+    @GetMapping("/info/{userId}")
     ResponseResult<User> getUserInfo(@PathVariable Long userId) {
         User user = userService.getById(userId);
         user.setSalt(null);
         user.setPassword(null);
         if (ObjectUtils.isEmpty(user)) {
-            return ResponseResult.fail(null, "get user info error");
+            throw new CustomException(ExceptionMessage.GET_USER_ERROR.getMessage());
         }
         return ResponseResult.success(user);
     }
 
-    @PostMapping("/update")
+    @PutMapping("/update")
     ResponseResult<UserUpdateVO> updateUserInfo(@RequestBody UserUpdateDTO dto, JwtDTO jwt) {
         String username = dto.getUsername();
         String password = dto.getPassword();
         Long userId = jwt.getUserId();
         User user = userService.updateUserById(userId, username, password);
         if (ObjectUtils.isEmpty(user)) {
-            return ResponseResult.fail(null, "update user info failed");
+            throw new CustomException(ExceptionMessage.UPDATE_USER_ERROR.getMessage());
         }
         UserUpdateVO userUpdateVO = new UserUpdateVO(user.getUsername(), user.getAvatar());
         return ResponseResult.success(userUpdateVO);

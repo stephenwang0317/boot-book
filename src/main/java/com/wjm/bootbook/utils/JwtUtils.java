@@ -29,7 +29,6 @@ public class JwtUtils {
         header.put("typ", "JWT");
         header.put("alg", "HS256");
 
-        Date nowDate = new Date();
         Date expireDate = new Date(System.currentTimeMillis() + EXPIRE_TIME);
 
         return JWT.create().withHeader(header)

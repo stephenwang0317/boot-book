@@ -13,7 +13,7 @@ spring:
       host: 123.56.143.129
       port: 6379
       password: wjm
-      database: 0
+      database: 1
       timeout: 1800000
       lettuce:
         pool:

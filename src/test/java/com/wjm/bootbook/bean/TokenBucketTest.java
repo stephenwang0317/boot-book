@@ -1,4 +1,4 @@
-package com.wjm.bootbook.component;
+package com.wjm.bootbook.bean;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

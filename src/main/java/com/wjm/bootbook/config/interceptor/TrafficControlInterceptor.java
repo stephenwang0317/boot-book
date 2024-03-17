@@ -1,8 +1,7 @@
 package com.wjm.bootbook.config.interceptor;
 
-import com.wjm.bootbook.component.RedisTokenBucket;
+import com.wjm.bootbook.bean.RedisTokenBucket;
 import com.wjm.bootbook.entity.common.ExceptionMessage;
-import com.wjm.bootbook.entity.dto.JwtDTO;
 import com.wjm.bootbook.exception.CustomException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Resource;

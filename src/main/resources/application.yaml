@@ -21,6 +21,14 @@ spring:
           max-wait: -1
           max-idle: 5
           min-idle: 0
+  elasticsearch:
+    uris: "http://123.56.143.129:9200"
+  rabbitmq:
+    host: 123.56.143.129
+    port: 5672
+    virtual-host: /
+    username: remote
+    password: 123456
 
 mybatis-plus:
   configuration:

@@ -1,11 +1,13 @@
 package com.wjm.bootbook.controller;
 
+import com.wjm.bootbook.bean.BaiduCheckService;
 import com.wjm.bootbook.entity.common.ExceptionMessage;
 import com.wjm.bootbook.entity.common.ResponseResult;
 import com.wjm.bootbook.entity.dto.JwtDTO;
 import com.wjm.bootbook.entity.dto.LoginDTO;
 import com.wjm.bootbook.entity.dto.RegisterDTO;
 import com.wjm.bootbook.entity.dto.UserUpdateDTO;
+import com.wjm.bootbook.entity.dto.review.TextReviewDTO;
 import com.wjm.bootbook.entity.pojo.User;
 import com.wjm.bootbook.entity.vo.LoginVO;
 import com.wjm.bootbook.entity.vo.RegisterVO;
@@ -33,6 +35,8 @@ public class UserController {
 
     @Autowired
     UserService userService;
+    @Autowired
+    BaiduCheckService checkService;
 
     @PostMapping("/register")
     ResponseResult<RegisterVO> userRegister(
@@ -45,6 +49,12 @@ public class UserController {
             errors.forEach(objectError -> sb.append(objectError.getDefaultMessage()).append("; "));
             String failReason = sb.toString();
             throw new RegisterException("register failed, because: " + failReason);
+        }
+
+        // text review
+        TextReviewDTO textReview = checkService.textReview(dto.getUsername());
+        if (!BaiduCheckService.REVIEW_OK.equals(textReview.getConclusion())) {
+            throw new CustomException(textReview.getReason());
         }
 
         String username = dto.getUsername();
@@ -105,6 +115,11 @@ public class UserController {
         String username = dto.getUsername();
         String password = dto.getPassword();
         Long userId = jwt.getUserId();
+        TextReviewDTO textReview = checkService.textReview(username);
+        if (!BaiduCheckService.REVIEW_OK.equals(textReview.getConclusion())) {
+            throw new CustomException(textReview.getReason());
+        }
+
         User user = userService.updateUserById(userId, username, password);
         if (ObjectUtils.isEmpty(user)) {
             throw new CustomException(ExceptionMessage.UPDATE_USER_ERROR.getMessage());

@@ -1,4 +1,4 @@
-package com.wjm.bootbook.component;
+package com.wjm.bootbook.bean;
 
 import com.wjm.bootbook.entity.common.ResponseResult;
 

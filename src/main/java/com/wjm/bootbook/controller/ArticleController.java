@@ -5,11 +5,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wjm.bootbook.annotation.RedisCache;
 import com.wjm.bootbook.bean.BaiduCheckService;
+import com.wjm.bootbook.config.MinioConfig;
 import com.wjm.bootbook.entity.common.ExceptionMessage;
 import com.wjm.bootbook.entity.common.ResponseResult;
 import com.wjm.bootbook.entity.dto.JwtDTO;
 import com.wjm.bootbook.entity.dto.review.SearchDTO;
-import com.wjm.bootbook.entity.dto.review.TextReviewDTO;
+import com.wjm.bootbook.entity.dto.review.BaiduReviewDTO;
 import com.wjm.bootbook.entity.pojo.Article;
 import com.wjm.bootbook.entity.vo.ArticleVO;
 import com.wjm.bootbook.exception.CustomException;
@@ -23,13 +24,16 @@ import org.elasticsearch.search.SearchHit;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import static com.wjm.bootbook.entity.common.ElasticSearchConstant.*;
 import static com.wjm.bootbook.entity.common.RabbitMqConstant.*;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author stephen wang
@@ -51,10 +55,13 @@ public class ArticleController {
     @Autowired
     RabbitTemplate rabbitTemplate;
 
+    @Autowired
+    MinioConfig minioConfig;
+
     @PostMapping("/add")
     @RedisCache(key = "'article:'+#article.artId", read = 0)
     ResponseResult<ArticleVO> addArticle(@RequestBody Article article) {
-        TextReviewDTO textReview = checkService.textReview(article.getArtContent(), article.getArtTitle());
+        BaiduReviewDTO textReview = checkService.textReview(article.getArtContent(), article.getArtTitle());
         if (!BaiduCheckService.REVIEW_OK.equals(textReview.getConclusion())) {
             throw new CustomException(textReview.getReason());
         }
@@ -94,7 +101,7 @@ public class ArticleController {
     @PutMapping("/update")
     @RedisCache(key = "'article:'+#artId", read = 0)
     ResponseResult<Article> updateArticleById(JwtDTO jwtDTO, @RequestBody Article article) {
-        TextReviewDTO textReview = checkService.textReview(article.getArtContent(), article.getArtTitle());
+        BaiduReviewDTO textReview = checkService.textReview(article.getArtContent(), article.getArtTitle());
         if (!BaiduCheckService.REVIEW_OK.equals(textReview.getConclusion())) {
             throw new CustomException(textReview.getReason());
         }
@@ -144,5 +151,20 @@ public class ArticleController {
             }
         }).toList();
         return ResponseResult.success(collect);
+    }
+
+    @PostMapping("/upload")
+    ResponseResult<Map<String, String>> testUploadFile(
+            JwtDTO dto,
+            @RequestParam("file") MultipartFile file) {
+        try {
+            String s = minioConfig.putObject(file, "avatar-" + dto.getUserId());
+            HashMap<String, String> hashMap = new HashMap<>();
+            hashMap.put("url", s);
+            rabbitTemplate.convertAndSend(MINIO_EXCHANGE_NAME, KEYWORD_UPLOAD, s);
+            return ResponseResult.success(hashMap);
+        } catch (Exception e) {
+            throw new CustomException("上传文件失败：" + e);
+        }
     }
 }

@@ -29,9 +29,20 @@ spring:
     virtual-host: /
     username: remote
     password: 123456
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
 
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   type-aliases-package: com.wjm.bootbook.entity.pojo
+
+minio:
+  host: http://123.56.143.129:9002
+  url: ${minio.host}/${minio.bucket}/
+  accessKey: remote
+  secretKey: wjm2000317.
+  bucket: boot-book-images

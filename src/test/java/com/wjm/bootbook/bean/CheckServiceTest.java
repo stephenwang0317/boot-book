@@ -1,13 +1,11 @@
 package com.wjm.bootbook.bean;
 
 import com.wjm.bootbook.entity.dto.review.BaiduTokenDTO;
-import com.wjm.bootbook.entity.dto.review.TextReviewDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 

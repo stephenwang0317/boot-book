@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TextReviewDTO {
+public class BaiduReviewDTO {
     String conclusion;
     List<DataElement> data;
 

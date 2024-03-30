@@ -1,7 +1,7 @@
 package com.wjm.bootbook.bean;
 
 import com.wjm.bootbook.entity.dto.review.BaiduTokenDTO;
-import com.wjm.bootbook.entity.dto.review.TextReviewDTO;
+import com.wjm.bootbook.entity.dto.review.BaiduReviewDTO;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -31,7 +31,10 @@ public class BaiduCheckService {
     private String accessTokenUrl = null;
     private static final String TEXT_REVIEW_URL =
             "https://aip.baidubce.com/rest/2.0/solution/v1/text_censor/v2/user_defined?access_token=";
-    private final static String JSON_KEY = "text";
+    private static final String IMAGE_REVIEW_URL =
+            "https://aip.baidubce.com/rest/2.0/solution/v1/img_censor/v2/user_defined?access_token=";
+    private final static String TEXT_JSON_KEY = "text";
+    private final static String IMAGE_JSON_KEY = "imgUrl";
     public final static String REVIEW_OK = "合规";
 
     @PostConstruct
@@ -53,12 +56,23 @@ public class BaiduCheckService {
         this.accessToken = Objects.requireNonNull(baiduTokenDTO).getAccessToken();
     }
 
-    public TextReviewDTO textReview(String... text) {
+    public BaiduReviewDTO textReview(String... text) {
         String url = TEXT_REVIEW_URL + this.accessToken;
         LinkedMultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-        map.put(JSON_KEY, List.of(text));
+        map.put(TEXT_JSON_KEY, List.of(text));
         try {
-            return restTemplate.postForObject(url, map, TextReviewDTO.class);
+            return restTemplate.postForObject(url, map, BaiduReviewDTO.class);
+        } catch (RestClientException e) {
+            return null;
+        }
+    }
+
+    public BaiduReviewDTO imageReview(String... imgUrl) {
+        String url = IMAGE_REVIEW_URL + this.accessToken;
+        LinkedMultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+        map.put(IMAGE_JSON_KEY, List.of(imgUrl));
+        try {
+            return restTemplate.postForObject(url, map, BaiduReviewDTO.class);
         } catch (RestClientException e) {
             return null;
         }

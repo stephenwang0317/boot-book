@@ -7,7 +7,7 @@ import com.wjm.bootbook.entity.dto.JwtDTO;
 import com.wjm.bootbook.entity.dto.LoginDTO;
 import com.wjm.bootbook.entity.dto.RegisterDTO;
 import com.wjm.bootbook.entity.dto.UserUpdateDTO;
-import com.wjm.bootbook.entity.dto.review.TextReviewDTO;
+import com.wjm.bootbook.entity.dto.review.BaiduReviewDTO;
 import com.wjm.bootbook.entity.pojo.User;
 import com.wjm.bootbook.entity.vo.LoginVO;
 import com.wjm.bootbook.entity.vo.RegisterVO;
@@ -52,7 +52,7 @@ public class UserController {
         }
 
         // text review
-        TextReviewDTO textReview = checkService.textReview(dto.getUsername());
+        BaiduReviewDTO textReview = checkService.textReview(dto.getUsername());
         if (!BaiduCheckService.REVIEW_OK.equals(textReview.getConclusion())) {
             throw new CustomException(textReview.getReason());
         }
@@ -115,7 +115,7 @@ public class UserController {
         String username = dto.getUsername();
         String password = dto.getPassword();
         Long userId = jwt.getUserId();
-        TextReviewDTO textReview = checkService.textReview(username);
+        BaiduReviewDTO textReview = checkService.textReview(username);
         if (!BaiduCheckService.REVIEW_OK.equals(textReview.getConclusion())) {
             throw new CustomException(textReview.getReason());
         }
